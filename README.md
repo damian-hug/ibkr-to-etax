@@ -177,6 +177,19 @@ dotnet run -- convert .\input\YourFile.xml
 - `YourFile.output.xml` - eCH-0196 compliant XML (ready for upload)
 - `YourFile.output.pdf` - PDF with embedded barcodes (experimental)
 
+### Run with Docker
+
+The Docker image sets `IBKR_TO_ETAX_DATA_DIR=/data`. Source files should be placed under `/data/uploads`, and generated files are written under `/data/outputs`.
+
+- `/data/uploads` - source IBKR XML files
+- `/data/outputs` - generated XML/PDF files and extracted validation XML, such as `YourFile.output.xml` and `YourFile.output.pdf`
+
+When running outside Docker, set `IBKR_TO_ETAX_DATA_DIR` yourself:
+
+```bash
+IBKR_TO_ETAX_DATA_DIR="$(pwd)/ibkr-to-etax-data" dotnet run -- convert ./ibkr-to-etax-data/uploads/YourFile.xml
+```
+
 ### Functions available for debugging
 
 Generate PDF directly from XML:

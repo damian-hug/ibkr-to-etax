@@ -37,7 +37,7 @@ namespace IbkrToEtax
             [Value(0, Required = true, MetaName = "xmlFile", HelpText = "eCH-0196 XML file to convert to PDF")]
             public string XmlFile { get; set; } = "";
 
-            [Option('o', "output", Required = false, HelpText = "Output PDF path (default: same as XML with .pdf extension)")]
+            [Option('o', "output", Required = false, HelpText = "Output PDF file name inside data/outputs")]
             public string? OutputPdf { get; set; }
         }
 
@@ -73,7 +73,19 @@ namespace IbkrToEtax
                 _logger!.LogError("File not found: {FilePath}", opts.InputFile);
                 return 2;
             }
-            return ConvertIbkrToEch(opts.InputFile, opts.InputFile.Replace(".xml", ".output.xml"), opts.InputFile.Replace(".xml", ".output.pdf"));
+
+            try
+            {
+                string outputXmlPath = GetOutputPath(opts.InputFile, ".output.xml");
+                string outputPdfPath = GetOutputPath(opts.InputFile, ".output.pdf");
+
+                return ConvertIbkrToEch(opts.InputFile, outputXmlPath, outputPdfPath);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger!.LogError("{Message}", ex.Message);
+                return 2;
+            }
         }
 
         static int RunValidate(ValidateOptions opts)
@@ -94,10 +106,10 @@ namespace IbkrToEtax
                 return 2;
             }
 
-            string outputPdf = opts.OutputPdf ?? opts.XmlFile.Replace(".xml", ".pdf");
-
             try
             {
+                string outputPdf = GetOutputPath(opts.OutputPdf ?? opts.XmlFile, ".pdf");
+
                 _logger!.LogInformation("=== PDF Generation (Debug Mode) ===");
                 Console.WriteLine();
                 _logger!.LogInformation("Input XML: {XmlFile}", opts.XmlFile);
@@ -109,6 +121,11 @@ namespace IbkrToEtax
                 Console.WriteLine();
                 _logger!.LogInformation("✓ PDF generated successfully");
                 return 0;
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger!.LogError("{Message}", ex.Message);
+                return 2;
             }
             catch (Exception ex)
             {
@@ -278,11 +295,18 @@ namespace IbkrToEtax
                         _logger!.LogInformation("  XML Length: {XmlLength} characters", result.ExtractedXml.Length);
                     }
 
-                    // Optionally save the extracted XML
-                    string extractedXmlPath = pdfPath.Replace(".pdf", "-extracted.xml");
-                    File.WriteAllText(extractedXmlPath, result.ExtractedXml);
-                    Console.WriteLine();
-                    _logger!.LogInformation("✓ Extracted XML saved to: {ExtractedXmlPath}", extractedXmlPath);
+                    try
+                    {
+                        string extractedXmlPath = GetOutputPath(pdfPath, "-extracted.xml");
+                        File.WriteAllText(extractedXmlPath, result.ExtractedXml);
+                        Console.WriteLine();
+                        _logger!.LogInformation("✓ Extracted XML saved to: {ExtractedXmlPath}", extractedXmlPath);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        _logger!.LogError("{Message}", ex.Message);
+                        return 2;
+                    }
                 }
 
                 Console.WriteLine();
@@ -295,6 +319,26 @@ namespace IbkrToEtax
                 _logger!.LogError(ex, "Error during validation");
                 return 3;
             }
+        }
+
+        static string GetOutputPath(string inputPath, string suffix)
+        {
+            string outputDirectory = GetOutputDirectory();
+            Directory.CreateDirectory(outputDirectory);
+
+            string fileName = Path.GetFileNameWithoutExtension(inputPath) + suffix;
+            return Path.Combine(outputDirectory, fileName);
+        }
+
+        static string GetOutputDirectory()
+        {
+            string? configuredDataDirectory = Environment.GetEnvironmentVariable("IBKR_TO_ETAX_DATA_DIR");
+            if (string.IsNullOrWhiteSpace(configuredDataDirectory))
+            {
+                throw new InvalidOperationException("IBKR_TO_ETAX_DATA_DIR must be set to the data directory path.");
+            }
+
+            return Path.Combine(configuredDataDirectory, "outputs");
         }
     }
 }

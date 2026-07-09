@@ -1,0 +1,16 @@
+.git
+.vs
+.vscode
+.idea
+bin
+obj
+logs
+**/bin
+**/obj
+**/*.user
+**/*.suo
+**/*.swp
+**/.DS_Store
+*.output.xml
+*.output.pdf
+*-extracted.xml
