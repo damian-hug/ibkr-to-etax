@@ -3,6 +3,10 @@ using System.Linq;
 using System.Xml.Linq;
 using CommandLine;
 using IbkrToEtax.IbkrReport;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 
@@ -41,6 +45,16 @@ namespace IbkrToEtax
             public string? OutputPdf { get; set; }
         }
 
+        [Verb("serve-frontend", HelpText = "Serve the Angular frontend")]
+        class ServeFrontendOptions
+        {
+            [Option('u', "url", Required = false, Default = "http://0.0.0.0:8080", HelpText = "URL Kestrel should bind to")]
+            public string Url { get; set; } = "http://0.0.0.0:8080";
+
+            [Option('r', "root", Required = false, HelpText = "Directory containing the compiled Angular frontend")]
+            public string? Root { get; set; }
+        }
+
         static int Main(string[] args)
         {
             // Configure logging with NLog
@@ -53,11 +67,12 @@ namespace IbkrToEtax
             _logger = _loggerFactory.CreateLogger<Program>();
 
             // Parse with CommandLineParser
-            int result = Parser.Default.ParseArguments<ConvertOptions, ValidateOptions, GenPdfOptions>(args)
+            int result = Parser.Default.ParseArguments<ConvertOptions, ValidateOptions, GenPdfOptions, ServeFrontendOptions>(args)
                 .MapResult(
                     (ConvertOptions opts) => RunConvert(opts),
                     (ValidateOptions opts) => RunValidate(opts),
                     (GenPdfOptions opts) => RunGenPdf(opts),
+                    (ServeFrontendOptions opts) => RunServeFrontend(opts),
                     errs => 1);
 
             // Dispose logger factory
@@ -86,6 +101,46 @@ namespace IbkrToEtax
                 _logger!.LogError("{Message}", ex.Message);
                 return 2;
             }
+        }
+
+        static int RunServeFrontend(ServeFrontendOptions opts)
+        {
+            string frontendRoot = GetFrontendRoot(opts.Root);
+
+            if (!Directory.Exists(frontendRoot))
+            {
+                _logger!.LogError("Frontend build directory not found: {FrontendRoot}", frontendRoot);
+                return 2;
+            }
+
+            var fileProvider = new PhysicalFileProvider(frontendRoot);
+            var builder = WebApplication.CreateBuilder();
+
+            builder.WebHost.UseUrls(opts.Url);
+            builder.Logging.ClearProviders();
+            builder.Logging.AddNLog();
+
+            var app = builder.Build();
+            var contentTypeProvider = new FileExtensionContentTypeProvider();
+
+            app.UseDefaultFiles(new DefaultFilesOptions
+            {
+                FileProvider = fileProvider
+            });
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = fileProvider,
+                ContentTypeProvider = contentTypeProvider
+            });
+            app.MapFallbackToFile("index.html", new StaticFileOptions
+            {
+                FileProvider = fileProvider,
+                ContentTypeProvider = contentTypeProvider
+            });
+
+            _logger!.LogInformation("Serving frontend from {FrontendRoot} on {Url}", frontendRoot, opts.Url);
+            app.Run();
+            return 0;
         }
 
         static int RunValidate(ValidateOptions opts)
@@ -339,6 +394,36 @@ namespace IbkrToEtax
             }
 
             return Path.Combine(configuredDataDirectory, "outputs");
+        }
+
+        static string GetFrontendRoot(string? configuredRoot)
+        {
+            if (!string.IsNullOrWhiteSpace(configuredRoot))
+            {
+                return Path.GetFullPath(configuredRoot);
+            }
+
+            string? environmentRoot = Environment.GetEnvironmentVariable("IBKR_TO_ETAX_FRONTEND_ROOT");
+            if (!string.IsNullOrWhiteSpace(environmentRoot))
+            {
+                return Path.GetFullPath(environmentRoot);
+            }
+
+            string publishedRoot = Path.Combine(AppContext.BaseDirectory, "frontend");
+            if (Directory.Exists(publishedRoot))
+            {
+                return publishedRoot;
+            }
+
+            return Path.GetFullPath(Path.Combine(
+                AppContext.BaseDirectory,
+                "..",
+                "..",
+                "..",
+                "frontend",
+                "dist",
+                "ibkr-to-etax-frontend",
+                "browser"));
         }
     }
 }

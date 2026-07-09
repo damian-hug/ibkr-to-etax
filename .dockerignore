@@ -5,6 +5,9 @@
 bin
 obj
 logs
+frontend/.angular
+frontend/dist
+frontend/node_modules
 **/bin
 **/obj
 **/*.user

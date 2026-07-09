@@ -31,6 +31,8 @@ project.assets.json
 
 # npm/node (if present)
 node_modules/
+frontend/.angular/
+frontend/dist/
 
 # Test results / coverage
 TestResults/

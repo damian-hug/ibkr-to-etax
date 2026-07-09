@@ -190,6 +190,25 @@ When running outside Docker, set `IBKR_TO_ETAX_DATA_DIR` yourself:
 IBKR_TO_ETAX_DATA_DIR="$(pwd)/ibkr-to-etax-data" dotnet run -- convert ./ibkr-to-etax-data/uploads/YourFile.xml
 ```
 
+### Run the frontend
+
+The Angular frontend lives in `frontend/`.
+
+```bash
+cd frontend
+npm ci
+npm start
+```
+
+The Docker image builds the Angular frontend and can serve it from the same app container:
+
+```bash
+docker build -t ibkr-to-etax .
+docker run --rm -p 8080:8080 ibkr-to-etax serve-frontend
+```
+
+In Codex, use the environment `serve` action to build/run the Dockerized frontend and open `http://localhost:8080` directly in the in-app browser.
+
 ### Functions available for debugging
 
 Generate PDF directly from XML:
