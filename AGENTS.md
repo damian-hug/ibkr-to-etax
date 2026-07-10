@@ -105,3 +105,8 @@ page/component -> feature store -> root API service -> backend
 - Keep route-level orchestration in pages and reusable rendering or interaction in components.
 - Prefer explicit feature boundaries over grouping all components, models, or stores globally by technical type.
 - Add abstractions when they represent a real shared concept, not in anticipation of possible future reuse.
+
+### Frontend testing
+
+- Do not create or run automated tests for the frontend.
+- Validate frontend changes with a production build instead.
