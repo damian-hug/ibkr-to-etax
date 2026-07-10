@@ -1,0 +1,41 @@
+.function-bento-grid article {
+  color: var(--color-text);
+}
+
+.function-bento-grid .title {
+  margin-block: 0.35rem;
+}
+
+.function-bento-grid .info {
+  margin: 0;
+}
+
+.function-bento-grid .om-bento-grid .om-bento-foreground {
+  display: grid;
+  z-index: 2;
+  inset: 0;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.function-bento-grid .om-bento-grid .om-bento-item {
+  transition:
+    box-shadow 220ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+.function-bento-grid .om-bento-grid .om-bento-item:hover {
+  transform: translateY(-0.15rem) scale(1.015);
+}
+
+.function-bento-grid .bento-dot-pattern {
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .function-bento-grid .om-bento-grid .om-bento-item {
+    transition: none;
+  }
+}
