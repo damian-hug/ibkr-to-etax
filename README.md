@@ -67,7 +67,7 @@ Follow the [IBKR Setup Guide](#ibkr-setup-guide) below to configure and run your
 ### 4. Convert to eCH-0196
 
 ```powershell
-dotnet run -- convert .\input\YourIBKRExport.xml
+dotnet run --project src/IbkrToEtax.Api/IbkrToEtax.Api.csproj -- convert .\input\YourIBKRExport.xml
 ```
 
 This generates:
@@ -169,7 +169,7 @@ Configure **Delivery Configuration**:
 
 ```powershell
 # Basic conversion
-dotnet run -- convert .\input\YourFile.xml
+dotnet run --project src/IbkrToEtax.Api/IbkrToEtax.Api.csproj -- convert .\input\YourFile.xml
 ```
 
 **Output:**
@@ -187,7 +187,7 @@ The Docker image sets `IBKR_TO_ETAX_DATA_DIR=/data`. Source files should be plac
 When running outside Docker, set `IBKR_TO_ETAX_DATA_DIR` yourself:
 
 ```bash
-IBKR_TO_ETAX_DATA_DIR="$(pwd)/ibkr-to-etax-data" dotnet run -- convert ./ibkr-to-etax-data/uploads/YourFile.xml
+IBKR_TO_ETAX_DATA_DIR="$(pwd)/ibkr-to-etax-data" dotnet run --project src/IbkrToEtax.Api/IbkrToEtax.Api.csproj -- convert ./ibkr-to-etax-data/uploads/YourFile.xml
 ```
 
 ### Run the frontend
@@ -214,13 +214,13 @@ In Codex, use the environment `serve` action to build/run the Dockerized fronten
 Generate PDF directly from XML:
 
 ```powershell
-dotnet run -- genpdf .\input\eCH-0196-statement.xml .\output\result.pdf
+dotnet run --project src/IbkrToEtax.Api/IbkrToEtax.Api.csproj -- genpdf .\input\eCH-0196-statement.xml .\output\result.pdf
 ```
 
 Read and Validate Data from existing PDF:
 
 ```powershell
-dotnet run -- validate .\input\SomePDF.pdf
+dotnet run --project src/IbkrToEtax.Api/IbkrToEtax.Api.csproj -- validate .\input\SomePDF.pdf
 ```
 
 -> Validates barcode structure, extracts embedded XML, and displays tax statement summary.
@@ -263,39 +263,26 @@ Total Withholding Tax in CHF: 250.12
 
 ## 🏗️ Project Structure
 
-```bash
+```text
 src/
-├── main.cs                     # CLI entry point & command handling
-├── DataHelper.cs               # Currency conversion & formatting utilities
-├── FinancialSummary.cs         # Financial summary data model
-├── FinancialSummaryPrinter.cs  # Financial reports & summaries
-├── PdfBarcodeGenerator.cs      # PDF417/CODE128C barcode generation
-├── PdfValidator.cs             # PDF validation & barcode extraction
-├── EchReport/                  # eCH-0196 data models & generation
-│   ├── EchPayment.cs           # Payment/dividend data model
-│   ├── EchSecurity.cs          # Security data model
-│   ├── EchSecurityDepot.cs     # Security depot data model
-│   ├── EchStatementBuilder.cs  # eCH-0196 statement construction
-│   ├── EchStock.cs             # Stock mutation data model
-│   ├── EchTaxStatement.cs      # Tax statement data model
-│   ├── EchTaxValue.cs          # Tax value data model
-│   └── EchXmlGenerator.cs      # eCH-0196 XML serialization
-└── IbkrReport/                 # IBKR FlexQuery parsing Data Models
-    ├── IbkrCashTransaction.cs  # Cash transaction data model
-    ├── IbkrEquitySummary.cs    # Equity summary data model
-    ├── IbkrFifoPerformanceSummary.cs  # FIFO performance data model
-    ├── IbkrFlexReport.cs       # FlexQuery XML parser
-    ├── IbkrOpenPosition.cs     # Open position data model
-    ├── IbkrSecurityInfo.cs     # Security info data model
-    ├── IbkrSummaryPerPosition.cs  # Position summary data model
-    ├── IbkrTrade.cs            # Trade data model
-    └── IIbkrForeignCashValueElement.cs  # Foreign cash value interface
-
-schemas/
-└── eCH-0196-2-2.xsd            # eCH-0196 XML schema for validation
+└── IbkrToEtax.Api/
+    ├── IbkrToEtax.Api.csproj
+    ├── Program.cs
+    ├── Features/
+    │   ├── EtaxReports/
+    │   ├── IbkrReports/
+    │   └── EchReports/
+    ├── Infrastructure/
+    │   ├── Logging/
+    │   └── Pdf/
+    ├── Shared/
+    │   └── Utils/
+    └── Schemas/
 
 tests/
-└── *.Tests.cs                  # Unit & integration tests
+├── *.Tests.cs
+├── TestData/
+└── ibkr-to-etax.Tests.csproj
 ```
 
 ## 🔧 Dependencies

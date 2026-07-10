@@ -110,3 +110,86 @@ page/component -> feature store -> root API service -> backend
 
 - Do not create or run automated tests for the frontend.
 - Validate frontend changes with a production build instead.
+
+## Backend Architecture
+
+The ASP.NET Core REST API under `src` uses a feature-oriented structure. Keep HTTP concerns at the API boundary, keep business workflows inside their owning feature, and move code into `Shared` only when it is genuinely reusable.
+
+```text
+src/
+└── IbkrToEtax.Api/
+    ├── IbkrToEtax.Api.csproj
+    ├── Program.cs
+    ├── appsettings.json
+    ├── appsettings.Development.json
+    ├── Controllers/
+    │   └── <EntityName>Controller.cs
+    ├── Dtos/
+    │   ├── Create<EntityName>Dto.cs
+    │   ├── Update<EntityName>Dto.cs
+    │   └── <EntityName>Dto.cs
+    ├── Features/
+    │   └── <FeatureName>/
+    │       ├── <FeatureName>Service.cs
+    │       └── <DomainModel>.cs
+    ├── Infrastructure/
+    │   └── <TechnicalConcern>/
+    │       └── <InfrastructureService>.cs
+    ├── Middleware/
+    │   └── ApiExceptionHandler.cs
+    ├── Shared/
+    │   ├── Errors/
+    │   └── Utils/
+    └── Schemas/
+        └── <SchemaFile>.xsd
+
+tests/
+├── IbkrToEtax.UnitTests/
+│   ├── IbkrToEtax.UnitTests.csproj
+│   ├── <FeatureName>/
+│   │   └── <ClassName>Tests.cs
+│   └── Support/
+│       └── <TestHelper>.cs
+└── IbkrToEtax.IntegrationTests/
+    ├── IbkrToEtax.IntegrationTests.csproj
+    ├── <EntityName>ApiTests.cs
+    └── TestData/
+        └── <TestDataFile>
+```
+
+Create directories only when they are needed. The tree defines the intended ownership and placement; it does not require empty placeholders.
+
+### Application entry point and configuration
+
+- Keep `Program.cs` focused on application startup, dependency registration, middleware, and endpoint mapping.
+- Put environment-specific settings in the appropriate `appsettings` file.
+- Register feature services and infrastructure dependencies with the narrowest suitable lifetime.
+
+### Controllers and DTOs
+
+- Keep controllers thin. They validate HTTP input, call the owning feature service, and translate the result into an HTTP response.
+- Put all data transferred between the frontend and backend in `Dtos`.
+- Use `Create<EntityName>Dto` for create input, `Update<EntityName>Dto` for update input, and `<EntityName>Dto` for data returned by the backend.
+- Add an update DTO only when an update endpoint actually exists.
+- Do not expose internal domain models as API response types.
+
+### Backend features and dependencies
+
+- Put each business workflow and its domain types under its owning directory in `Features`.
+- Put PDF handling, logging, and other external or technical concerns in `Infrastructure`.
+- Put HTTP pipeline behavior in `Middleware`.
+- Move code to `Shared` only when it is small, stateless, and genuinely used across features.
+- Do not add repositories or database abstractions unless persistence is introduced.
+- A feature may depend on `Infrastructure` and `Shared`; `Infrastructure` and `Shared` must not depend on a feature.
+
+### Backend testing
+
+- Put isolated business-logic tests in `IbkrToEtax.UnitTests`, grouped by feature when useful.
+- Put tests that exercise the running HTTP API or multiple application layers in `IbkrToEtax.IntegrationTests`.
+- Keep reusable test-only helpers near the tests that use them and test input files under `TestData`.
+
+The intended backend dependency flow is:
+
+```text
+controller -> DTO mapping -> feature service -> domain/infrastructure
+```

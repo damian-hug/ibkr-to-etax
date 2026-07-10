@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ibkr-to-etax.csproj" />
+    <ProjectReference Include="..\src\IbkrToEtax.Api\IbkrToEtax.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

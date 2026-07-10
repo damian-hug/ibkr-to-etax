@@ -1,11 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY ibkr-to-etax.csproj ./
-RUN dotnet restore ibkr-to-etax.csproj
+COPY src/IbkrToEtax.Api/IbkrToEtax.Api.csproj ./src/IbkrToEtax.Api/
+RUN dotnet restore src/IbkrToEtax.Api/IbkrToEtax.Api.csproj
 
 COPY . ./
-RUN dotnet publish ibkr-to-etax.csproj \
+RUN dotnet publish src/IbkrToEtax.Api/IbkrToEtax.Api.csproj \
     --configuration Release \
     --no-restore \
     --output /app/publish \

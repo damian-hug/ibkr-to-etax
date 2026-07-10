@@ -4,15 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AssemblyName>ibkr-to-etax</AssemblyName>
+    <RootNamespace>IbkrToEtax</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="examples\**\*" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="schemas\**\*" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="Schemas\**\*" CopyToOutputDirectory="PreserveNewest" TargetPath="schemas\%(Filename)%(Extension)" />
+    <None Update="Infrastructure\Logging\nlog.config" CopyToOutputDirectory="PreserveNewest" TargetPath="nlog.config" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
