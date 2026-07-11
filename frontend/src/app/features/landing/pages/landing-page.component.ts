@@ -27,12 +27,11 @@ import { FunctionBentoGridComponent } from "../components/function-bento-grid/fu
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 1rem;
     }
 
     .landing__header,
     .landing__functions {
-      width: min(100% - 2rem, 70rem);
+      width: min(100%, 70rem);
     }
 
     .landing__functions {

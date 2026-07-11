@@ -11,6 +11,14 @@ body {
   background: var(--color-background);
 }
 
+main {
+  padding: var(--space-md);
+}
+
+.dot-pattern {
+  height: 100%;
+}
+
 *,
 *::before,
 *::after {

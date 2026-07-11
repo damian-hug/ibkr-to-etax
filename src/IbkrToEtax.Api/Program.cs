@@ -2,11 +2,13 @@ using System;
 using System.Linq;
 using System.Xml.Linq;
 using CommandLine;
+using IbkrToEtax.Features.Archive;
 using IbkrToEtax.IbkrReport;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 
@@ -119,6 +121,12 @@ namespace IbkrToEtax
             builder.WebHost.UseUrls(opts.Url);
             builder.Logging.ClearProviders();
             builder.Logging.AddNLog();
+            builder.Services.AddControllers();
+            builder.Services.AddSingleton(new ArchiveOptions
+            {
+                OutputDirectory = GetOutputDirectory()
+            });
+            builder.Services.AddSingleton<IArchiveService, ArchiveService>();
 
             var app = builder.Build();
             var contentTypeProvider = new FileExtensionContentTypeProvider();
@@ -132,6 +140,7 @@ namespace IbkrToEtax
                 FileProvider = fileProvider,
                 ContentTypeProvider = contentTypeProvider
             });
+            app.MapControllers();
             app.MapFallbackToFile("index.html", new StaticFileOptions
             {
                 FileProvider = fileProvider,

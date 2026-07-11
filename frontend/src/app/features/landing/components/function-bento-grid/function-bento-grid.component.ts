@@ -3,6 +3,7 @@ import {
   Component,
   ViewEncapsulation,
 } from "@angular/core";
+import { RouterLink } from "@angular/router";
 import {
   NgxBentoGridComponent,
   NgxBentoItemComponent,
@@ -15,19 +16,21 @@ import { NgxDotpatternComponent } from "@omnedia/ngx-dotpattern";
     NgxBentoGridComponent,
     NgxBentoItemComponent,
     NgxDotpatternComponent,
+    RouterLink,
   ],
   template: `
     <om-bento-grid
       class="function-bento-grid"
       [columns]="2"
       itemBg="var(--color-surface)"
+      itemBorder="0"
       shadowColor="transparent"
     >
       <om-bento-item [colSpan]="2">
         <ng-template #bentoBg>
           <om-dotpattern
             patternColor="rgba(71, 85, 105, 0.22)"
-            styleClass="bento-dot-pattern"
+            styleClass="dot-pattern"
           />
         </ng-template>
 
@@ -44,7 +47,7 @@ import { NgxDotpatternComponent } from "@omnedia/ngx-dotpattern";
         <ng-template #bentoBg>
           <om-dotpattern
             patternColor="rgba(71, 85, 105, 0.22)"
-            styleClass="bento-dot-pattern"
+            styleClass="dot-pattern"
           />
         </ng-template>
 
@@ -61,16 +64,15 @@ import { NgxDotpatternComponent } from "@omnedia/ngx-dotpattern";
         <ng-template #bentoBg>
           <om-dotpattern
             patternColor="rgba(71, 85, 105, 0.22)"
-            styleClass="bento-dot-pattern"
+            styleClass="dot-pattern"
           />
         </ng-template>
 
         <ng-template #bentoFg>
-          <article>
-            <p>Coming soon</p>
+          <a class="archive-link" routerLink="/archive">
             <h3 class="title">Archive</h3>
             <p class="info">Keep past conversions close at hand.</p>
-          </article>
+          </a>
         </ng-template>
       </om-bento-item>
     </om-bento-grid>
