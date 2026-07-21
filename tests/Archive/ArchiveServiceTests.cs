@@ -29,7 +29,7 @@ public sealed class ArchiveServiceTests
     }
 
     [Fact]
-    public void GetItems_ExcludesFilesThatAreNotConversionOutputs()
+    public void GetItems_IncludesAllPdfAndXmlFiles()
     {
         using var archive = new TemporaryArchive();
         archive.AddFile("included.output.xml", Utc(2026, 1, 1));
@@ -37,9 +37,11 @@ public sealed class ArchiveServiceTests
         archive.AddFile("validated-extracted.xml", Utc(2026, 1, 3));
         archive.AddFile("notes.txt", Utc(2026, 1, 4));
 
-        var item = Assert.Single(CreateService(archive).GetItems());
+        var names = CreateService(archive).GetItems().Select(item => item.Name).ToArray();
 
-        Assert.Equal("included", item.Name);
+        Assert.Equal(
+            new[] { "validated-extracted", "debug", "included" },
+            names);
     }
 
     [Fact]
@@ -61,14 +63,28 @@ public sealed class ArchiveServiceTests
 
     [Theory]
     [InlineData("../secret.output.xml")]
-    [InlineData("ordinary.xml")]
-    [InlineData("debug.pdf")]
+    [InlineData("notes.txt")]
     [InlineData(".output.xml")]
     public void GetFile_RejectsUnsafeOrUnsupportedNames(string fileName)
     {
         using var archive = new TemporaryArchive();
 
         Assert.Null(CreateService(archive).GetFile(fileName));
+    }
+
+    [Theory]
+    [InlineData("ordinary.xml", "application/xml")]
+    [InlineData("debug.pdf", "application/pdf")]
+    [InlineData("UPPER.XML", "application/xml")]
+    public void GetFile_AcceptsAnyPdfOrXmlName(string fileName, string contentType)
+    {
+        using var archive = new TemporaryArchive();
+        archive.AddFile(fileName, Utc(2026, 1, 1));
+
+        var file = CreateService(archive).GetFile(fileName);
+
+        Assert.NotNull(file);
+        Assert.Equal(contentType, file.ContentType);
     }
 
     [Fact]

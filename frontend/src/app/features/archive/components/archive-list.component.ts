@@ -2,6 +2,7 @@ import { DatePipe } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
 } from "@angular/core";
@@ -52,27 +53,10 @@ import {
           <td class="archive-table__name">
             <span>{{ item.name }}</span>
             @if (pdfFile(item)) {
-              <svg
-                class="archive-table__preview-icon"
-                viewBox="0 0 24 24"
+              <span
+                class="pi pi-eye archive-table__preview-icon"
                 aria-hidden="true"
-              >
-                <path
-                  d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                />
-              </svg>
+              ></span>
             }
           </td>
           <td class="archive-table__date-column">
@@ -87,26 +71,16 @@ import {
             >
               <p-splitbutton
                 label="Download"
-                [model]="downloadItems(item)"
+                [model]="downloadItemsByItem().get(item)"
                 appendTo="body"
                 expandAriaLabel="Choose download format"
                 (onClick)="downloadPdf(item)"
               >
                 <ng-template #content>
-                  <svg
-                    class="archive-table__download-icon"
-                    viewBox="0 0 24 24"
+                  <span
+                    class="pi pi-download archive-table__download-icon"
                     aria-hidden="true"
-                  >
-                    <path
-                      d="M12 3v12m0 0 5-5m-5 5-5-5M5 21h14"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                    />
-                  </svg>
+                  ></span>
                 </ng-template>
               </p-splitbutton>
             </div>
@@ -141,10 +115,9 @@ import {
     }
 
     .archive-table__preview-icon {
-      width: 1.2rem;
-      height: 1.2rem;
       margin-left: 0.5rem;
       color: var(--color-text-muted);
+      font-size: 1.2rem;
       vertical-align: -0.2rem;
     }
 
@@ -164,14 +137,20 @@ import {
     }
 
     .archive-table__download-icon {
-      width: 1.1rem;
-      height: 1.1rem;
+      font-size: 1.1rem;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ArchiveListComponent {
   readonly items = input.required<ArchiveItemDto[]>();
+
+  protected readonly downloadItemsByItem = computed(
+    () =>
+      new Map(
+        this.items().map((item) => [item, this.createDownloadItems(item)]),
+      ),
+  );
 
   private readonly messageService = inject(MessageService);
 
@@ -199,13 +178,13 @@ export class ArchiveListComponent {
   protected downloadPdf(item: ArchiveItemDto): void {
     const pdf = this.pdfFile(item);
     if (pdf) {
-      this.download(pdf.downloadUrl);
+      this.download(pdf.downloadUrl, pdf.name);
       return;
     }
 
     const xml = this.file(item, "xml");
     if (xml) {
-      this.download(xml.downloadUrl);
+      this.download(xml.downloadUrl, xml.name);
       this.messageService.add({
         severity: "info",
         summary: "XML downloaded",
@@ -214,32 +193,37 @@ export class ArchiveListComponent {
     }
   }
 
-  protected downloadItems(item: ArchiveItemDto): MenuItem[] {
+  private createDownloadItems(item: ArchiveItemDto): MenuItem[] {
     const pdf = this.pdfFile(item);
     const xml = this.file(item, "xml");
 
     return [
       {
         label: "PDF",
+        icon: "pi pi-download",
         disabled: !pdf,
-        command: () => pdf && this.download(pdf.downloadUrl),
+        url: pdf?.downloadUrl,
       },
       {
         label: "XML",
+        icon: "pi pi-download",
         disabled: !xml,
-        command: () => xml && this.download(xml.downloadUrl),
+        url: xml?.downloadUrl,
       },
       {
         label: "ZIP",
-        command: () => this.download(item.zipDownloadUrl),
+        icon: "pi pi-download",
+        url: item.zipDownloadUrl,
       },
     ];
   }
 
-  private download(url: string): void {
+  private download(url: string, fileName: string): void {
     const link = document.createElement("a");
     link.href = url;
-    link.download = "";
+    link.download = fileName;
+    document.body.append(link);
     link.click();
+    link.remove();
   }
 }

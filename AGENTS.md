@@ -90,6 +90,7 @@ page/component -> feature store -> root API service -> backend
 ### UI system and global styles
 
 - Use PrimeNG and NGXUI as direct UI dependencies. Import their standalone components or modules in the application components that use them.
+- Use PrimeIcons for standard application icons. Do not write manual inline SVG icon markup or embed SVG icon paths in CSS; select the closest appropriate PrimeIcons glyph instead. Treat branded artwork, illustrations, and other non-icon graphics as separate assets when PrimeIcons is not applicable.
 - Do not wrap library components solely to rename them, set trivial defaults, or hide their APIs.
 - Do not create a shared module whose only purpose is to re-export PrimeNG or NGXUI.
 - Put application-wide library providers and configuration in `app.config.ts`.

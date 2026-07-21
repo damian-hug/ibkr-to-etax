@@ -77,7 +77,7 @@ public sealed class ArchiveApiTests
         using var client = server.CreateClient();
 
         var missing = await client.GetAsync("/api/archive/files/missing.output.xml");
-        var unsupported = await client.GetAsync("/api/archive/files/debug.pdf/download");
+        var unsupported = await client.GetAsync("/api/archive/files/notes.txt/download");
 
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, unsupported.StatusCode);

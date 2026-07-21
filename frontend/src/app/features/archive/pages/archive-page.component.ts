@@ -42,12 +42,12 @@ import { ArchiveStore } from "../store/archive.store";
               <div class="archive__state" aria-live="polite">
                 <p>Loading archive…</p>
               </div>
-            } @else if (store.value().length === 0) {
+            } @else if ((store.value() ?? []).length === 0) {
               <div class="archive__state">
                 <h2>No generated statements yet</h2>
               </div>
             } @else {
-              <app-archive-list [items]="store.value()" />
+              <app-archive-list [items]="store.value() ?? []" />
             }
           </div>
         </om-dotpattern>

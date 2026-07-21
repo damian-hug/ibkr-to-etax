@@ -2,8 +2,7 @@ namespace IbkrToEtax.Features.Archive;
 
 public sealed class ArchiveService : IArchiveService
 {
-    private const string XmlSuffix = ".output.xml";
-    private const string PdfSuffix = ".output.pdf";
+    private const string OutputSuffix = ".output";
 
     private readonly string _outputDirectory;
 
@@ -109,17 +108,26 @@ public sealed class ArchiveService : IArchiveService
             return false;
         }
 
-        if (fileName.EndsWith(XmlSuffix, StringComparison.OrdinalIgnoreCase))
+        var extension = Path.GetExtension(fileName);
+        if (string.Equals(extension, ".xml", StringComparison.OrdinalIgnoreCase))
         {
-            itemName = fileName[..^XmlSuffix.Length];
             type = "xml";
             contentType = "application/xml";
         }
-        else if (fileName.EndsWith(PdfSuffix, StringComparison.OrdinalIgnoreCase))
+        else if (string.Equals(extension, ".pdf", StringComparison.OrdinalIgnoreCase))
         {
-            itemName = fileName[..^PdfSuffix.Length];
             type = "pdf";
             contentType = "application/pdf";
+        }
+        else
+        {
+            return false;
+        }
+
+        itemName = fileName[..^extension.Length];
+        if (itemName.EndsWith(OutputSuffix, StringComparison.OrdinalIgnoreCase))
+        {
+            itemName = itemName[..^OutputSuffix.Length];
         }
 
         return itemName.Length > 0;

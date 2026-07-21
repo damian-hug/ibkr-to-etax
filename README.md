@@ -204,7 +204,10 @@ The Docker image builds the Angular frontend and can serve it from the same app 
 
 ```bash
 docker build -t ibkr-to-etax .
-docker run --rm -p 8080:8080 ibkr-to-etax serve-frontend
+mkdir -p data/uploads data/outputs
+docker run --rm -p 8080:8080 \
+  --mount type=bind,source="$(pwd)/data",target=/data \
+  ibkr-to-etax serve-frontend
 ```
 
 In Codex, use the environment `serve` action to build/run the Dockerized frontend and open `http://localhost:8080` directly in the in-app browser.

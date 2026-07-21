@@ -22,6 +22,7 @@
     "@omnedia/ngx-dotpattern": "4.0.1",
     "@omnedia/ngx-shiny-text": "4.0.1",
     "@primeuix/themes": "2.0.3",
+    "primeicons": "^8.0.0",
     "primeng": "21.1.9",
     "rxjs": "7.8.2",
     "tslib": "2.8.1"

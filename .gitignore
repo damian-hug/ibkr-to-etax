@@ -75,6 +75,7 @@ coverage/
 # Generated output files
 eCH-0196-output.xml
 eCH-0196-output.pdf
+/data/
 
 # OS generated files
 .DS_Store

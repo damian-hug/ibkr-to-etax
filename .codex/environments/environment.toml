@@ -18,9 +18,12 @@ docker build -t ibkr-to-etax .
 
 docker rm -f ibkr-to-etax-frontend 2>/dev/null || true
 
+mkdir -p data/uploads data/outputs
+
 docker run --rm -d \
   --name ibkr-to-etax-frontend \
   -p 8080:8080 \
+  --mount type=bind,source="$(pwd)/data",target=/data \
   ibkr-to-etax serve-frontend
 
 until curl -fsS http://localhost:8080/ >/dev/null 2>&1; do
